@@ -1,252 +1,385 @@
-'use client'
+"use client";
 
-import { useEffect, useRef } from 'react'
-import { usePlayerStore } from '@/stores/playerStore'
-import { Play, Pause, Volume2, SkipBack, SkipForward, Shuffle, Repeat } from 'lucide-react'
+import { useEffect, useRef } from "react";
+import { usePlayerStore } from "@/stores/playerStore";
+import { useThemeStore } from "@/stores/themeStore";
+import {
+  Play, Pause, Volume2, Volume1, VolumeX,
+  SkipBack, SkipForward, Shuffle, Repeat,
+} from "lucide-react";
+import { usePlayerShortcuts } from "@/hooks/usePlayerShortcuts";
 
 function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60)
-  const s = Math.floor(seconds % 60)
-  return `${m}:${s.toString().padStart(2, '0')}`
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export default function Player() {
-  const audioRef = useRef<HTMLAudioElement>(null)
+  const audioRef = useRef<HTMLAudioElement>(null);
+  usePlayerShortcuts(audioRef);
+
   const {
-    currentTrack,
-    streamUrl,
-    isPlaying,
-    volume,
-    progress,
-    duration,
-    setIsPlaying,
-    setProgress,
-    setDuration,
-    setVolume,
-  } = usePlayerStore()
+    currentTrack, streamUrl, isPlaying, volume, progress, duration,
+    setIsPlaying, setProgress, setDuration, setVolume,
+  } = usePlayerStore();
+
+  const { accentRgb, setFromImage } = useThemeStore();
 
   useEffect(() => {
     if (streamUrl && audioRef.current) {
-      audioRef.current.src = streamUrl
-      audioRef.current.volume = volume
-      audioRef.current.play()
-      setIsPlaying(true)
+      audioRef.current.src = streamUrl;
+      audioRef.current.volume = volume;
+      audioRef.current.play();
+      setIsPlaying(true);
     }
-  }, [streamUrl])
+  }, [streamUrl]);
 
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume
+    if (audioRef.current) audioRef.current.volume = volume;
+  }, [volume]);
+
+  // Extract theme from thumbnail whenever track changes
+  useEffect(() => {
+    if (currentTrack?.thumbnail) {
+      setFromImage(currentTrack.thumbnail);
     }
-  }, [volume])
+  }, [currentTrack?.thumbnail]);
+
+  useEffect(() => {
+    document.title = currentTrack
+      ? `${currentTrack.title} • Wavefront`
+      : "Wavefront";
+  }, [currentTrack]);
 
   const togglePlay = () => {
-    if (!audioRef.current) return
+    if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current.pause()
-      setIsPlaying(false)
+      audioRef.current.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current.play()
-      setIsPlaying(true)
+      audioRef.current.play();
+      setIsPlaying(true);
     }
-  }
+  };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value)
-    if (audioRef.current) {
-      audioRef.current.currentTime = time
-      setProgress(time)
-    }
-  }
+  const progressPercent = duration ? (progress / duration) * 100 : 0;
 
-  const progressPercent = duration ? (progress / duration) * 100 : 0
-
-  if (!currentTrack) return null
+  if (!currentTrack) return null;
 
   return (
-    <div className="fixed bottom-0 z-50" style={{ left: '240px', right: '288px' }}>
-      {/* Glass player bar */}
+    <div
+      className="fixed bottom-0 z-50"
+      style={{ left: "260px", right: "300px" }}
+    >
+      {/* Ambient accent glow leaking up from player */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '60%',
+          height: 80,
+          background: `radial-gradient(ellipse at bottom, rgba(${accentRgb}, 0.12) 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          transition: 'background 1.2s ease',
+        }}
+      />
+
       <div
         style={{
-          background: 'rgba(12,12,18,0.75)',
-          backdropFilter: 'blur(40px) saturate(180%)',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 -8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06)',
+          background: "rgba(8, 8, 13, 0.88)",
+          backdropFilter: "blur(56px) saturate(180%)",
+          WebkitBackdropFilter: "blur(56px) saturate(180%)",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: `0 -12px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05), 0 -1px 0 rgba(${accentRgb}, 0.08)`,
+          padding: "16px 32px 18px",
+          position: 'relative',
+          transition: 'box-shadow 1.2s ease',
         }}
-        className="px-8 py-4"
       >
-        <div className="flex items-center gap-8">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
 
           {/* Track info */}
-          <div className="flex items-center gap-3 w-56 flex-shrink-0">
-            <div className="relative flex-shrink-0">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, width: 220, flexShrink: 0 }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              {/* Thumbnail glow */}
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: 12,
+                  backgroundImage: `url(${currentTrack.thumbnail})`,
+                  backgroundSize: 'cover',
+                  filter: 'blur(20px)',
+                  opacity: 0.5,
+                  transform: 'scale(0.8) translateY(10px)',
+                  zIndex: 0,
+                }}
+              />
               <img
                 src={currentTrack.thumbnail}
                 alt={currentTrack.title}
-                className="w-11 h-11 rounded-xl object-cover"
-                style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.4)' }}
-              />
-              {/* Glow behind art */}
-              <div
-                className="absolute inset-0 rounded-xl -z-10"
                 style={{
-                  background: `url(${currentTrack.thumbnail})`,
-                  backgroundSize: 'cover',
-                  filter: 'blur(12px)',
-                  opacity: 0.5,
-                  transform: 'scale(1.2)',
+                  width: 46,
+                  height: 46,
+                  borderRadius: 12,
+                  objectFit: 'cover',
+                  position: 'relative',
+                  zIndex: 1,
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  display: 'block',
                 }}
               />
             </div>
-            <div className="min-w-0">
-              <p className="text-white text-sm font-medium truncate leading-tight">
+
+            <div style={{ minWidth: 0 }}>
+              <p
+                style={{
+                  fontSize: 13.5,
+                  fontWeight: 500,
+                  color: 'rgba(255,255,255,0.90)',
+                  letterSpacing: '-0.01em',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  marginBottom: 3,
+                }}
+              >
                 {currentTrack.title}
               </p>
-              <p className="text-xs truncate mt-0.5" style={{ color: 'rgba(255,255,255,0.40)' }}>
+              <p
+                style={{
+                  fontSize: 12,
+                  color: 'rgba(255,255,255,0.35)',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                }}
+              >
                 {currentTrack.artist}
               </p>
             </div>
           </div>
 
-          {/* Center controls */}
-          <div className="flex-1 flex flex-col items-center gap-3">
+          {/* Center — controls + progress */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
 
-            {/* Buttons */}
-            <div className="flex items-center gap-5">
+            {/* Control buttons */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              {/* Shuffle */}
               <button
-                className="transition-all"
-                style={{ color: 'rgba(255,255,255,0.25)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+                style={{ color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.22)')}
               >
-                <Shuffle size={15} />
+                <Shuffle size={14} />
               </button>
 
+              {/* Skip back */}
               <button
-                className="transition-all"
-                style={{ color: 'rgba(255,255,255,0.40)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.40)'}
+                style={{ color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.85)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
               >
                 <SkipBack size={18} />
               </button>
 
-              {/* Play button — glass style from Image 1 */}
+              {/* Play/Pause — accent-tinted glass pill */}
               <button
                 onClick={togglePlay}
-                className="w-11 h-11 rounded-full flex items-center justify-center transition-all"
                 style={{
-                  background: 'linear-gradient(145deg, rgba(139,124,248,0.35), rgba(96,165,250,0.25))',
-                  border: '1px solid rgba(139,124,248,0.40)',
-                  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.20), 0 4px 16px rgba(139,124,248,0.30)',
+                  width: 44,
+                  height: 44,
+                  borderRadius: '50%',
+                  border: `1px solid rgba(${accentRgb}, 0.45)`,
+                  background: `linear-gradient(145deg, rgba(${accentRgb}, 0.32) 0%, rgba(${accentRgb}, 0.16) 100%)`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 20px rgba(${accentRgb}, 0.28)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s cubic-bezier(0.34,1.56,0.64,1)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'scale(1.08)'
-                  e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.20), 0 8px 24px rgba(139,124,248,0.45)'
+                  e.currentTarget.style.transform = 'scale(1.10)';
+                  e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.14), 0 8px 28px rgba(${accentRgb}, 0.40)`;
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'scale(1)'
-                  e.currentTarget.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.20), 0 4px 16px rgba(139,124,248,0.30)'
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.14), 0 4px 20px rgba(${accentRgb}, 0.28)`;
                 }}
               >
                 {isPlaying
-                  ? <Pause size={16} className="text-purple-300" />
-                  : <Play size={16} className="text-purple-300 ml-0.5" />
+                  ? <Pause size={15} style={{ color: 'rgba(255,255,255,0.92)' }} />
+                  : <Play size={15} style={{ color: 'rgba(255,255,255,0.92)', marginLeft: 2 }} />
                 }
               </button>
 
+              {/* Skip forward */}
               <button
-                className="transition-all"
-                style={{ color: 'rgba(255,255,255,0.40)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.40)'}
+                style={{ color: 'rgba(255,255,255,0.45)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.85)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.45)')}
               >
                 <SkipForward size={18} />
               </button>
 
+              {/* Repeat */}
               <button
-                className="transition-all"
-                style={{ color: 'rgba(255,255,255,0.25)' }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.7)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+                style={{ color: 'rgba(255,255,255,0.22)', background: 'none', border: 'none', cursor: 'pointer', padding: 4, transition: 'color 0.15s' }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.65)')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.22)')}
               >
-                <Repeat size={15} />
+                <Repeat size={14} />
               </button>
             </div>
 
             {/* Progress bar */}
-            <div className="w-full flex items-center gap-3">
-              <span className="text-xs w-8 text-right tabular-nums"
-                style={{ color: 'rgba(255,255,255,0.30)' }}>
+            <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.28)',
+                  fontVariantNumeric: 'tabular-nums',
+                  width: 36,
+                  textAlign: 'right',
+                  flexShrink: 0,
+                }}
+              >
                 {formatTime(progress)}
               </span>
 
-              {/* Custom progress track */}
+              {/* Track */}
               <div
-                className="flex-1 relative h-1 rounded-full cursor-pointer group"
-                style={{ background: 'rgba(255,255,255,0.08)' }}
+                style={{
+                  flex: 1,
+                  height: 3,
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.07)',
+                  position: 'relative',
+                  cursor: 'pointer',
+                }}
+                className="group"
                 onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect()
-                  const ratio = (e.clientX - rect.left) / rect.width
-                  const time = ratio * (duration || 0)
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const ratio = (e.clientX - rect.left) / rect.width;
+                  const time = ratio * (duration || 0);
                   if (audioRef.current) {
-                    audioRef.current.currentTime = time
-                    setProgress(time)
+                    audioRef.current.currentTime = time;
+                    setProgress(time);
                   }
                 }}
               >
                 {/* Fill */}
                 <div
-                  className="absolute left-0 top-0 h-full rounded-full transition-all"
                   style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    height: '100%',
+                    borderRadius: 999,
                     width: `${progressPercent}%`,
-                    background: 'linear-gradient(90deg, #8b7cf8, #60a5fa)',
+                    background: `linear-gradient(90deg, rgba(${accentRgb}, 0.9), rgba(${accentRgb}, 0.6))`,
+                    transition: 'background 1.2s ease',
                   }}
                 />
-                {/* Thumb — shows on hover */}
+                {/* Scrubber thumb */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity"
                   style={{
+                    position: 'absolute',
+                    top: '50%',
                     left: `${progressPercent}%`,
                     transform: 'translate(-50%, -50%)',
-                    boxShadow: '0 0 8px rgba(139,124,248,0.6)',
+                    width: 12,
+                    height: 12,
+                    borderRadius: '50%',
+                    background: '#fff',
+                    opacity: 0,
+                    transition: 'opacity 0.15s',
+                    boxShadow: `0 0 10px rgba(${accentRgb}, 0.6)`,
+                    pointerEvents: 'none',
                   }}
+                  className="group-hover:opacity-100"
                 />
               </div>
 
-              <span className="text-xs w-8 tabular-nums"
-                style={{ color: 'rgba(255,255,255,0.30)' }}>
+              <span
+                style={{
+                  fontSize: 11,
+                  color: 'rgba(255,255,255,0.28)',
+                  fontVariantNumeric: 'tabular-nums',
+                  width: 36,
+                  flexShrink: 0,
+                }}
+              >
                 {formatTime(duration)}
               </span>
             </div>
           </div>
 
           {/* Volume */}
-          <div className="flex items-center gap-3 w-32 flex-shrink-0">
-            <Volume2 size={15} style={{ color: 'rgba(255,255,255,0.30)' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: 148, flexShrink: 0 }}>
+            <button
+              onClick={() => setVolume(volume > 0 ? 0 : 0.8)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'rgba(255,255,255,0.28)',
+                padding: 4,
+                flexShrink: 0,
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.7)')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255,255,255,0.28)')}
+            >
+              {volume === 0
+                ? <VolumeX size={14} />
+                : volume < 0.5
+                ? <Volume1 size={14} />
+                : <Volume2 size={14} />
+              }
+            </button>
+
             <div
-              className="flex-1 relative h-1 rounded-full cursor-pointer group"
-              style={{ background: 'rgba(255,255,255,0.08)' }}
+              style={{ flex: 1, position: 'relative', height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.07)', cursor: 'pointer' }}
+              className="group"
               onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect()
-                const ratio = (e.clientX - rect.left) / rect.width
-                setVolume(Math.min(1, Math.max(0, ratio)))
+                const rect = e.currentTarget.getBoundingClientRect();
+                const ratio = (e.clientX - rect.left) / rect.width;
+                setVolume(Math.min(1, Math.max(0, ratio)));
               }}
             >
               <div
-                className="absolute left-0 top-0 h-full rounded-full"
                 style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  height: '100%',
+                  borderRadius: 999,
                   width: `${volume * 100}%`,
-                  background: 'linear-gradient(90deg, #8b7cf8, #34d399)',
+                  background: `rgba(${accentRgb}, 0.75)`,
+                  transition: 'background 1.2s ease',
                 }}
               />
               <div
-                className="absolute top-1/2 w-3 h-3 rounded-full bg-white opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{
+                  position: 'absolute',
+                  top: '50%',
                   left: `${volume * 100}%`,
                   transform: 'translate(-50%, -50%)',
-                  boxShadow: '0 0 8px rgba(139,124,248,0.5)',
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  background: '#fff',
+                  opacity: 0,
+                  transition: 'opacity 0.15s',
+                  pointerEvents: 'none',
                 }}
+                className="group-hover:opacity-100"
               />
             </div>
           </div>
@@ -261,5 +394,5 @@ export default function Player() {
         onEnded={() => setIsPlaying(false)}
       />
     </div>
-  )
+  );
 }

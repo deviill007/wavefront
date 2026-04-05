@@ -23,4 +23,31 @@ export async function resolveStream(videoId: string): Promise<Track> {
   return res.data.data
 }
 
+export interface LyricLine {
+  time: number
+  text: string
+}
+
+export interface LyricsData {
+  synced: LyricLine[]
+  plain: string
+  source: string
+}
+
+export async function fetchLyrics(
+  title: string,
+  artist: string,
+  duration?: number
+): Promise<LyricsData | null> {
+  try {
+    const res = await api.get('/api/lyrics', {
+      params: { title, artist, duration }
+    })
+    return res.data.data
+  } catch {
+    return null
+  }
+}
+
+
 export default api

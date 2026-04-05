@@ -1,8 +1,7 @@
 import { create } from 'zustand'
-import { Track } from '@/lib/api'
+import { Track, LyricsData } from '@/lib/api'
 
 interface PlayerState {
-  // Current track
   currentTrack: Track | null
   streamUrl: string | null
   isPlaying: boolean
@@ -10,11 +9,10 @@ interface PlayerState {
   volume: number
   progress: number
   duration: number
-
-  // Queue
   queue: Track[]
+  lyrics: LyricsData | null
+  activeLyricIndex: number
 
-  // Actions
   setCurrentTrack: (track: Track) => void
   setStreamUrl: (url: string) => void
   setIsPlaying: (playing: boolean) => void
@@ -24,6 +22,8 @@ interface PlayerState {
   setDuration: (duration: number) => void
   addToQueue: (track: Track) => void
   clearQueue: () => void
+  setLyrics: (lyrics: LyricsData | null) => void
+  setActiveLyricIndex: (index: number) => void
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
@@ -35,6 +35,8 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   progress: 0,
   duration: 0,
   queue: [],
+  lyrics: null,
+  activeLyricIndex: -1,
 
   setCurrentTrack: (track) => set({ currentTrack: track }),
   setStreamUrl: (url) => set({ streamUrl: url }),
@@ -45,4 +47,6 @@ export const usePlayerStore = create<PlayerState>((set) => ({
   setDuration: (duration) => set({ duration }),
   addToQueue: (track) => set((state) => ({ queue: [...state.queue, track] })),
   clearQueue: () => set({ queue: [] }),
+  setLyrics: (lyrics) => set({ lyrics }),
+  setActiveLyricIndex: (index) => set({ activeLyricIndex: index }),
 }))

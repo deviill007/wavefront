@@ -1,7 +1,8 @@
 'use client'
 
-import { Home, Search, Library, Heart, Download, Radio, Settings } from 'lucide-react'
+import { Home, Search, Library, Heart, Download, Radio, Settings, Plus } from 'lucide-react'
 import { useState } from 'react'
+import { useThemeStore } from '@/stores/themeStore'
 
 const navItems = [
   { icon: Home, label: 'Home', href: '/' },
@@ -12,109 +13,276 @@ const navItems = [
   { icon: Download, label: 'Downloads', href: '/downloads' },
 ]
 
+const playlists = ['Late Night Mix', 'Chill Vibes', 'Workout 🔥', 'Focus Mode', 'Sunday Morning']
+
 export default function Sidebar() {
   const [active, setActive] = useState('Home')
+  const { accentRgb } = useThemeStore()
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-60 flex flex-col z-40 py-6 px-3"
+      className="fixed left-0 top-0 h-screen w-[260px] flex flex-col z-40"
       style={{
-        background: 'rgba(10,10,15,0.8)',
-        backdropFilter: 'blur(24px)',
-        borderRight: '1px solid rgba(255,255,255,0.06)',
+        background: 'rgba(8, 8, 12, 0.92)',
+        backdropFilter: 'blur(48px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(48px) saturate(160%)',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
       }}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-3 mb-8">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-          style={{
-            background: 'linear-gradient(135deg, rgba(139,124,248,0.9), rgba(96,165,250,0.8))',
-            boxShadow: '0 0 20px rgba(139,124,248,0.4)',
-          }}
-        >
-          🌊
-        </div>
-        <span
-          className="text-lg font-semibold tracking-tight"
-          style={{
-            background: 'linear-gradient(135deg, #e8eaf0, rgba(139,124,248,0.9))',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          Wavefront
-        </span>
-      </div>
+      {/* Accent glow top-left */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          top: -60,
+          left: -60,
+          width: 240,
+          height: 240,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, rgba(${accentRgb}, 0.12) 0%, transparent 70%)`,
+          pointerEvents: 'none',
+          transition: 'background 1.2s ease',
+        }}
+      />
 
-      {/* Nav */}
-      <nav className="flex flex-col gap-1">
-        {navItems.map(({ icon: Icon, label, href }) => (
-          <button
-            key={label}
-            onClick={() => setActive(label)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left w-full"
+      {/* Logo */}
+      <div style={{ padding: '28px 20px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div
             style={{
-              background: active === label
-                ? 'rgba(139,124,248,0.15)'
-                : 'transparent',
-              border: active === label
-                ? '1px solid rgba(139,124,248,0.20)'
-                : '1px solid transparent',
-              color: active === label
-                ? '#c4b5fd'
-                : 'rgba(255,255,255,0.35)',
-            }}
-            onMouseEnter={(e) => {
-              if (active !== label) {
-                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                e.currentTarget.style.color = 'rgba(255,255,255,0.7)'
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (active !== label) {
-                e.currentTarget.style.background = 'transparent'
-                e.currentTarget.style.color = 'rgba(255,255,255,0.35)'
-              }
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              background: `linear-gradient(145deg, rgba(${accentRgb}, 0.9), rgba(${accentRgb}, 0.5))`,
+              border: `1px solid rgba(${accentRgb}, 0.5)`,
+              boxShadow: `0 4px 20px rgba(${accentRgb}, 0.3), inset 0 1px 0 rgba(255,255,255,0.15)`,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 18,
+              transition: 'all 1.2s ease',
+              flexShrink: 0,
             }}
           >
-            <Icon size={18} />
-            <span className="text-sm font-medium">{label}</span>
-          </button>
-        ))}
+            🌊
+          </div>
+          <span
+            style={{
+              fontSize: 17,
+              fontWeight: 600,
+              letterSpacing: '-0.025em',
+              background: `linear-gradient(135deg, rgba(255,255,255,0.92), rgba(${accentRgb}, 0.85))`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              transition: 'background 1.2s ease',
+            }}
+          >
+            Wavefront
+          </span>
+        </div>
+      </div>
+
+      {/* Primary nav */}
+      <nav style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {navItems.map(({ icon: Icon, label }) => {
+          const isActive = active === label
+          return (
+            <button
+              key={label}
+              onClick={() => setActive(label)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '10px 12px',
+                borderRadius: 11,
+                border: isActive
+                  ? `1px solid rgba(${accentRgb}, 0.25)`
+                  : '1px solid transparent',
+                background: isActive
+                  ? `rgba(${accentRgb}, 0.14)`
+                  : 'transparent',
+                color: isActive
+                  ? `rgba(${accentRgb !== '32, 32, 40' ? '255,255,255' : '255,255,255'}, 0.90)`
+                  : 'rgba(255,255,255,0.33)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                transition: 'all 0.18s ease',
+                boxShadow: isActive
+                  ? `inset 0 1px 0 rgba(255,255,255,0.06)`
+                  : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.68)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.33)'
+                }
+              }}
+            >
+              <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
+              <span style={{ fontSize: 13.5, fontWeight: isActive ? 500 : 400, letterSpacing: '-0.005em' }}>
+                {label}
+              </span>
+              {isActive && (
+                <div
+                  style={{
+                    marginLeft: 'auto',
+                    width: 5,
+                    height: 5,
+                    borderRadius: '50%',
+                    background: `rgba(${accentRgb}, 1)`,
+                    boxShadow: `0 0 8px rgba(${accentRgb}, 0.7)`,
+                    transition: 'background 1.2s ease, box-shadow 1.2s ease',
+                  }}
+                />
+              )}
+            </button>
+          )
+        })}
       </nav>
 
-      {/* Playlists section */}
-      <div className="mt-6 px-3">
-        <p className="text-xs font-medium mb-3"
-          style={{ color: 'rgba(255,255,255,0.20)', letterSpacing: '0.08em' }}>
-          PLAYLISTS
-        </p>
-        <div className="flex flex-col gap-1">
-          {['Late Night Mix', 'Chill Vibes', 'Workout 🔥'].map((name) => (
+      {/* Divider */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '16px 20px' }} />
+
+      {/* Playlists */}
+      <div style={{ padding: '0 12px', flex: 1, overflow: 'hidden' }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 8px',
+            marginBottom: 10,
+          }}
+        >
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: 'rgba(255,255,255,0.18)',
+              letterSpacing: '0.10em',
+              textTransform: 'uppercase',
+            }}
+          >
+            Playlists
+          </span>
+          <button
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: 6,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              color: 'rgba(255,255,255,0.30)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.08)'
+              e.currentTarget.style.color = 'rgba(255,255,255,0.6)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+              e.currentTarget.style.color = 'rgba(255,255,255,0.30)'
+            }}
+          >
+            <Plus size={12} />
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          {playlists.map((name) => (
             <button
               key={name}
-              className="text-left text-sm px-2 py-1.5 rounded-lg transition-all truncate"
-              style={{ color: 'rgba(255,255,255,0.30)' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.65)'}
-              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.30)'}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '8px 10px',
+                borderRadius: 9,
+                border: '1px solid transparent',
+                background: 'transparent',
+                cursor: 'pointer',
+                textAlign: 'left',
+                width: '100%',
+                color: 'rgba(255,255,255,0.28)',
+                transition: 'all 0.14s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                e.currentTarget.style.color = 'rgba(255,255,255,0.62)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'transparent'
+                e.currentTarget.style.color = 'rgba(255,255,255,0.28)'
+              }}
             >
-              {name}
+              {/* Mini color swatch */}
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: 7,
+                  background: `rgba(${accentRgb}, 0.12)`,
+                  border: `1px solid rgba(${accentRgb}, 0.18)`,
+                  flexShrink: 0,
+                  transition: 'background 1.2s ease',
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 12.5,
+                  fontWeight: 400,
+                  letterSpacing: '-0.005em',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {name}
+              </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Bottom settings */}
-      <div className="mt-auto px-3">
+      {/* Settings */}
+      <div style={{ padding: '12px 12px 20px' }}>
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 12 }} />
         <button
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl w-full transition-all"
-          style={{ color: 'rgba(255,255,255,0.25)' }}
-          onMouseEnter={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-          onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.25)'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            padding: '10px 12px',
+            borderRadius: 11,
+            border: '1px solid transparent',
+            background: 'transparent',
+            color: 'rgba(255,255,255,0.25)',
+            cursor: 'pointer',
+            width: '100%',
+            transition: 'all 0.14s',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.55)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'transparent'
+            e.currentTarget.style.color = 'rgba(255,255,255,0.25)'
+          }}
         >
-          <Settings size={18} />
-          <span className="text-sm font-medium">Settings</span>
+          <Settings size={16} strokeWidth={1.8} />
+          <span style={{ fontSize: 13, fontWeight: 400 }}>Settings</span>
         </button>
       </div>
     </aside>

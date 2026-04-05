@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { searchTracks, resolveStream, Track } from '@/lib/api'
 import { usePlayerStore } from '@/stores/playerStore'
+import { useThemeStore } from '@/stores/themeStore'
 import TrackCard from '@/components/ui/TrackCard'
 import Player from '@/components/player/Player'
-import { Search } from 'lucide-react'
+import { Search, Sparkles } from 'lucide-react'
 
 export default function Home() {
   const [query, setQuery] = useState('')
@@ -13,18 +14,12 @@ export default function Home() {
   const [isSearching, setIsSearching] = useState(false)
   const [loadingId, setLoadingId] = useState<string | null>(null)
 
-  const {
-    currentTrack,
-    isPlaying,
-    setCurrentTrack,
-    setStreamUrl,
-    setIsLoading,
-  } = usePlayerStore()
+  const { currentTrack, isPlaying, setCurrentTrack, setStreamUrl, setIsLoading } = usePlayerStore()
+  const { accentRgb } = useThemeStore()
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!query.trim()) return
-
     setIsSearching(true)
     try {
       const tracks = await searchTracks(query)
@@ -38,11 +33,9 @@ export default function Home() {
 
   const handlePlay = async (track: Track) => {
     if (loadingId === track.id) return
-
     setLoadingId(track.id)
     setIsLoading(true)
     setCurrentTrack(track)
-
     try {
       const stream = await resolveStream(track.id)
       setStreamUrl(stream.url!)
@@ -55,115 +48,196 @@ export default function Home() {
   }
 
   return (
-    <main
-      className="min-h-screen pb-28"
-      style={{
-        background: 'linear-gradient(135deg, #0d0f14 0%, #12151c 100%)',
-      }}
-    >
-      {/* Ambient background */}
+    <main style={{ minHeight: '100vh', paddingBottom: 120 }}>
+      {/* Dynamic ambient wash — responds to accent color */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        aria-hidden
         style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: 'none',
           background: `
-            radial-gradient(ellipse 60% 50% at 15% 20%, rgba(139,124,248,0.10) 0%, transparent 70%),
-            radial-gradient(ellipse 50% 40% at 85% 10%, rgba(96,165,250,0.08) 0%, transparent 70%)
-          `
+            radial-gradient(ellipse 55% 45% at 30% 15%, rgba(${accentRgb}, 0.09) 0%, transparent 70%),
+            radial-gradient(ellipse 45% 35% at 80% 5%, rgba(${accentRgb}, 0.05) 0%, transparent 65%)
+          `,
+          transition: 'background 1.4s ease',
         }}
       />
 
-      <div className="relative max-w-2xl mx-auto px-4 pt-16">
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: 680, margin: '0 auto', padding: '60px 28px 0' }}>
 
-        {/* Header */}
-<div className="mb-10">
-  <h2
-    className="text-2xl font-semibold tracking-tight mb-1"
-    style={{
-      background: 'linear-gradient(135deg, #e8eaf0, rgba(139,124,248,0.9))',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-    }}
-  >
-    Search
-  </h2>
-  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.25)' }}>
-    Find any song in the world
-  </p>
-</div>
+        {/* Page header */}
+        <div style={{ marginBottom: 40 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <h1
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                letterSpacing: '-0.030em',
+                background: `linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(${accentRgb}, 0.75) 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                transition: 'background 1.4s ease',
+                lineHeight: 1.1,
+              }}
+            >
+              Search
+            </h1>
+            <Sparkles
+              size={18}
+              style={{
+                color: `rgba(${accentRgb}, 0.6)`,
+                marginBottom: 2,
+                transition: 'color 1.4s ease',
+              }}
+            />
+          </div>
+          <p style={{ fontSize: 13.5, color: 'rgba(255,255,255,0.28)', letterSpacing: '-0.005em' }}>
+            Find any song in the world
+          </p>
+        </div>
 
         {/* Search bar */}
-        <form onSubmit={handleSearch} className="mb-8">
-          <div className="relative">
+        <form onSubmit={handleSearch} style={{ marginBottom: 36 }}>
+          <div style={{ position: 'relative' }}>
             <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30"
+              size={17}
+              style={{
+                position: 'absolute',
+                left: 18,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                color: 'rgba(255,255,255,0.25)',
+                pointerEvents: 'none',
+              }}
             />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search songs, artists, albums..."
-              className="w-full pl-12 pr-4 py-4 rounded-2xl text-white placeholder-white/25 outline-none text-sm"
+              placeholder="Songs, artists, albums..."
               style={{
+                width: '100%',
+                paddingLeft: 48,
+                paddingRight: 120,
+                paddingTop: 16,
+                paddingBottom: 16,
+                borderRadius: 16,
                 background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.10)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.09)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                color: 'rgba(255,255,255,0.88)',
+                fontSize: 14,
+                outline: 'none',
+                letterSpacing: '-0.005em',
+                transition: 'border-color 0.2s, box-shadow 0.2s',
+                boxSizing: 'border-box',
               }}
               onFocus={(e) => {
-                e.target.style.borderColor = 'rgba(139,124,248,0.4)'
-                e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.07), 0 0 0 3px rgba(139,124,248,0.10)'
+                e.target.style.borderColor = `rgba(${accentRgb}, 0.40)`
+                e.target.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 3px rgba(${accentRgb}, 0.10)`
               }}
               onBlur={(e) => {
-                e.target.style.borderColor = 'rgba(255,255,255,0.10)'
-                e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.07)'
+                e.target.style.borderColor = 'rgba(255,255,255,0.09)'
+                e.target.style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.05)'
               }}
             />
             <button
               type="submit"
               disabled={isSearching}
-              className="absolute right-3 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl text-sm font-medium transition-all"
               style={{
-                background: 'rgba(139,124,248,0.25)',
-                border: '1px solid rgba(139,124,248,0.35)',
-                color: '#c4b5fd',
+                position: 'absolute',
+                right: 8,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                padding: '8px 18px',
+                borderRadius: 11,
+                border: `1px solid rgba(${accentRgb}, 0.35)`,
+                background: `rgba(${accentRgb}, 0.22)`,
+                color: 'rgba(255,255,255,0.80)',
+                fontSize: 13,
+                fontWeight: 500,
+                cursor: isSearching ? 'not-allowed' : 'pointer',
+                letterSpacing: '-0.005em',
+                transition: 'all 0.18s ease',
+                opacity: isSearching ? 0.6 : 1,
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={(e) => {
+                if (!isSearching) {
+                  e.currentTarget.style.background = `rgba(${accentRgb}, 0.32)`
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.95)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = `rgba(${accentRgb}, 0.22)`
+                e.currentTarget.style.color = 'rgba(255,255,255,0.80)'
               }}
             >
-              {isSearching ? 'Searching...' : 'Search'}
+              {isSearching ? 'Searching…' : 'Search'}
             </button>
           </div>
         </form>
 
         {/* Results */}
         {results.length > 0 && (
-          <div className="flex flex-col gap-2">
-            <p className="text-white/20 text-xs mb-2 px-1">
-              {results.length} results for "{query}"
+          <div>
+            <p
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'rgba(255,255,255,0.18)',
+                letterSpacing: '0.10em',
+                textTransform: 'uppercase',
+                marginBottom: 16,
+              }}
+            >
+              {results.length} results — "{query}"
             </p>
-            {results.map((track) => (
-              <TrackCard
-                key={track.id}
-                track={track}
-                onPlay={handlePlay}
-                isPlaying={currentTrack?.id === track.id && isPlaying}
-                isLoading={loadingId === track.id}
-              />
-            ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {results.map((track) => (
+                <TrackCard
+                  key={track.id}
+                  track={track}
+                  onPlay={handlePlay}
+                  isPlaying={currentTrack?.id === track.id && isPlaying}
+                  isLoading={loadingId === track.id}
+                />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Empty state */}
-        {results.length === 0 && (
-          <div className="text-center mt-20">
-            <div className="text-4xl mb-4">🎵</div>
-            <p className="text-white/20 text-sm">
+        {results.length === 0 && !isSearching && (
+          <div style={{ textAlign: 'center', marginTop: 80 }}>
+            <div
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+              }}
+            >
+              <Search size={22} style={{ color: 'rgba(255,255,255,0.14)' }} />
+            </div>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.20)', marginBottom: 6 }}>
               Search for any song to start listening
+            </p>
+            <p style={{ fontSize: 12.5, color: 'rgba(255,255,255,0.10)' }}>
+              Powered by YouTube Music
             </p>
           </div>
         )}
 
       </div>
 
-      {/* Player */}
       <Player />
     </main>
   )

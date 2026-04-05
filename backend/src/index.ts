@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { createServer } from 'http'
 import streamRouter from './routes/stream'
 import searchRouter from './routes/search'
+import lyricsRouter from './routes/lyrics'
 
 dotenv.config()
 
@@ -29,6 +30,8 @@ app.get('/', (req, res) => {
 // Routes
 app.use('/api/stream', streamRouter)
 app.use('/api/search', searchRouter)
+app.use('/api/lyrics', lyricsRouter)
+
 
 httpServer.listen(PORT, () => {
   console.log(`🎵 Wavefront backend running on http://localhost:${PORT}`)
