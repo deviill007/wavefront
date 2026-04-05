@@ -40,3 +40,7 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
   box-shadow: 0 0 6px rgba(139,124,248,0.5);
 }
+
+div:hover .track-queue-btn {
+  opacity: 1 !important;
+}

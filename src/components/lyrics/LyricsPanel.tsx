@@ -56,7 +56,7 @@ export default function LyricsPanel() {
     return (
       <div
         ref={containerRef}
-        style={{ height: '100%', overflowY: 'auto', padding: '12px 22px 48px', scrollbarWidth: 'none' }}
+        style={{ height: '100%', overflowY: 'auto', padding: '12px 22px 48px', scrollbarWidth: 'none', position: 'relative', overflow: 'hidden',}}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {lyrics.synced.map((line, i) => {

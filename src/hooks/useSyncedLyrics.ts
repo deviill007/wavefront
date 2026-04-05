@@ -11,26 +11,40 @@ export function useSyncedLyrics() {
     setActiveLyricIndex,
   } = usePlayerStore()
 
-  // Fetch lyrics when track changes
   useEffect(() => {
     if (!currentTrack) return
     setLyrics(null)
     setActiveLyricIndex(-1)
+
+    let cancelled = false
+
+    // Timeout — if no lyrics found in 10s, set empty so loader stops
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        setLyrics({ synced: [], plain: '', source: 'none' })
+      }
+    }, 10000)
 
     fetchLyrics(
       currentTrack.title,
       currentTrack.artist,
       currentTrack.duration
     ).then(data => {
-      setLyrics(data)
+      if (cancelled) return
+      clearTimeout(timeout)
+      // If null returned, set empty object so loader stops
+      setLyrics(data ?? { synced: [], plain: '', source: 'none' })
     })
+
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
   }, [currentTrack?.id])
 
-  // Update active lyric line as song progresses
   useEffect(() => {
     if (!lyrics?.synced?.length) return
 
-    // Find current line — last line whose time <= progress
     let active = -1
     for (let i = 0; i < lyrics.synced.length; i++) {
       if (lyrics.synced[i].time <= progress) {

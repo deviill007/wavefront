@@ -49,5 +49,16 @@ export async function fetchLyrics(
   }
 }
 
+export async function fetchRelated(videoId: string, title?: string, artist?: string): Promise<Track[]> {
+  try {
+    const params = new URLSearchParams({ videoId })
+    if (title) params.append('title', title)
+    if (artist) params.append('artist', artist)
+    const res = await api.get(`/api/search/related?${params.toString()}`)
+    return res.data.data || []
+  } catch {
+    return []
+  }
+}
 
 export default api
