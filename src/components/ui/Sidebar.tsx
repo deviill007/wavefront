@@ -36,6 +36,7 @@ export default function Sidebar() {
         background: 'rgba(8,8,12,0.95)',
         backdropFilter: 'blur(48px)',
         borderRight: '1px solid rgba(255,255,255,0.05)',
+        marginTop: 50,
       }}
     >
       {/* Accent orb */}
@@ -53,30 +54,22 @@ export default function Sidebar() {
         padding: sidebarCollapsed ? '20px 0' : '20px 16px',
         flexShrink: 0,
       }}>
-        {!sidebarCollapsed && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{
-              width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-              background: `linear-gradient(145deg, rgba(${accentRgb},0.9), rgba(${accentRgb},0.5))`,
-              border: `1px solid rgba(${accentRgb},0.4)`,
-              boxShadow: `0 4px 16px rgba(${accentRgb},0.25)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 16, transition: 'all 1.2s ease',
-            }}>🌊</div>
-            <span style={{
-              fontSize: 16, fontWeight: 700, letterSpacing: '-0.025em',
-              color: 'rgba(255,255,255,0.92)',
-            }}>Wavefront</span>
-          </div>
-        )}
-
         {sidebarCollapsed && (
-          <div style={{
-            width: 34, height: 34, borderRadius: 10,
-            background: `linear-gradient(145deg, rgba(${accentRgb},0.9), rgba(${accentRgb},0.5))`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 16, cursor: 'pointer',
-          }} onClick={toggleSidebar}>🌊</div>
+          <button
+            onClick={toggleSidebar}
+            style={{
+              width: 26, height: 26, borderRadius: 8,
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.04)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', color: 'rgba(255,255,255,0.30)',
+              transition: 'all 0.15s', flexShrink: 0,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.09)'; e.currentTarget.style.color = 'rgba(255,255,255,0.70)' }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'rgba(255,255,255,0.30)' }}
+          >
+            <ChevronRight size={13} />
+          </button>
         )}
 
         {!sidebarCollapsed && (

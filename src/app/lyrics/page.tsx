@@ -41,7 +41,7 @@ export default function LyricsPage() {
   }
 
   return (
-    <div style={{ height: '100vh', overflow: 'hidden', position: 'relative', paddingBottom: 80 }}>
+    <div style={{ height: '100vh', overflow: 'hidden', position: 'relative', paddingBottom: 80, paddingTop: 50 }}>
 
       {/* Blurred album art bg */}
       {currentTrack && (
@@ -84,7 +84,7 @@ export default function LyricsPage() {
             zIndex: 10,
             paddingTop: 28,
             paddingBottom: 20,
-            background: 'linear-gradient(180deg, rgba(8,8,13,0.95) 0%, rgba(8,8,13,0.80) 75%, transparent 100%)',
+            // background: 'linear-gradient(180deg, rgba(8,8,13,0.95) 0%, rgba(8,8,13,0.80) 75%, transparent 100%)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
           }}

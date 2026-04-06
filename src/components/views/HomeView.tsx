@@ -11,7 +11,7 @@ export default function HomeView() {
   const { setActiveView } = useUIStore()
 
   return (
-    <div style={{ maxWidth: 700, margin: '0 auto', padding: '40px 28px 0' }}>
+    <div style={{ maxWidth: 700, margin: '0 auto', padding: '40px 28px 0', paddingTop: 70 }}>
 
       {/* Greeting */}
       <div style={{ marginBottom: 48 }}>
@@ -19,7 +19,7 @@ export default function HomeView() {
           fontSize: 32, fontWeight: 700, letterSpacing: '-0.04em',
           color: 'rgba(255,255,255,0.92)', marginBottom: 8,
         }}>
-          Good {getGreeting()} 👋
+          Good {getGreeting()}
         </h1>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.28)' }}>
           What do you want to listen to today?
@@ -91,7 +91,7 @@ export default function HomeView() {
 
 function getGreeting() {
   const h = new Date().getHours()
-  if (h < 12) return 'morning'
-  if (h < 17) return 'afternoon'
-  return 'evening'
+  if (h < 12) return 'Morning'
+  if (h < 17) return 'Afternoon'
+  return 'Evening'
 }

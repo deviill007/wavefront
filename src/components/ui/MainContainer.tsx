@@ -2,7 +2,6 @@
 
 import { useUIStore } from '@/stores/uiStore'
 import { useThemeStore } from '@/stores/themeStore'
-import TopBar from './Topbar'
 import HomeView from '@/components/views/HomeView'
 import SearchView from '@/components/views/SearchView'
 import LibraryView from '@/components/views/LibraryView'
@@ -33,9 +32,6 @@ export default function MainContainer() {
         `,
         transition: 'background 1.4s ease',
       }} />
-
-      <TopBar />
-
       <div style={{ position: 'relative', zIndex: 1 }}>
         {activeView === 'home' && <HomeView />}
         {activeView === 'search' && <SearchView />}
