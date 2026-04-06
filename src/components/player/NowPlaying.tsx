@@ -6,7 +6,7 @@ import { useUIStore } from '@/stores/uiStore'
 import { getAudioRef } from '@/components/player/AudioManager'
 import {
   Heart, Music2, MoreHorizontal,
-  Radio, X, Plus, Clock, Disc3, Tv2, ImageIcon,
+  Radio, X, Plus, Clock, Disc3, Tv2, ImageIcon, ChevronRight, ChevronLeft,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { fetchRelated, resolveStream, Track } from '@/lib/api'
@@ -24,6 +24,7 @@ export default function NowPlaying() {
   const [videoMode, setVideoMode] = useState(false)
   const [related, setRelated] = useState<Track[]>([])
   const [loadingRelated, setLoadingRelated] = useState(false)
+  const { rightPanelCollapsed, toggleRightPanel } = useUIStore()
 
   // Reset video mode + fetch related when track changes
   useEffect(() => {
@@ -73,6 +74,25 @@ export default function NowPlaying() {
     finally { setIsLoading(false) }
   }
 
+  if (rightPanelCollapsed) return (
+  <button
+    onClick={toggleRightPanel}
+    style={{
+      position: 'fixed', right: 12, top: 12, zIndex: 40,
+      width: 32, height: 32, borderRadius: 10,
+      background: 'rgba(255,255,255,0.06)',
+      border: '1px solid rgba(255,255,255,0.09)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      cursor: 'pointer', color: 'rgba(255,255,255,0.40)',
+      transition: 'all 0.15s',
+    }}
+    onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.10)'; e.currentTarget.style.color = 'rgba(255,255,255,0.80)' }}
+    onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.40)' }}
+  >
+    <ChevronLeft size={14} />
+  </button>
+)
+
   return (
     <aside
       className="fixed right-0 top-0 h-screen w-[400px] flex flex-col z-40 overflow-hidden"
@@ -101,13 +121,21 @@ export default function NowPlaying() {
           {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 20px 0', flexShrink: 0 }}>
             <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.16)', letterSpacing: '0.13em', textTransform: 'uppercase' }}>Now Playing</span>
-            <button
-              style={{ width: 28, height: 28, borderRadius: 8, border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,0.24)', transition: 'all 0.15s' }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.24)' }}
-            >
-              <MoreHorizontal size={13} />
-            </button>
+<button
+  onClick={toggleRightPanel}
+  style={{
+    width: 28, height: 28, borderRadius: 8,
+    border: '1px solid rgba(255,255,255,0.07)',
+    background: 'rgba(255,255,255,0.03)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    cursor: 'pointer', color: 'rgba(255,255,255,0.24)',
+    transition: 'all 0.15s',
+  }}
+  onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)' }}
+  onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.24)' }}
+>
+  <ChevronRight size={14} />
+</button>
           </div>
 
           {/* Art / Video area */}
@@ -129,7 +157,7 @@ export default function NowPlaying() {
                   }}
                 >
                   <ImageIcon size={11} />
-                  Art
+                  Audio
                 </button>
                 <button
                   onClick={switchToVideo}
